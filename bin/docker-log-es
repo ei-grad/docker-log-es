@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+from tornado.log import app_log as log
+from tornado import gen
+from tornado.ioloop import IOLoop
+from tornado.options import options
+from docker_log_es.storage import Storage
+from docker_log_es.docker import Docker
+from docker_log_es.elasticsearch import ElasticStreamer
+
+@gen.coroutine
+def send_data(data):
+    print('Send data: %s' % data)
+
+
+@gen.coroutine
+def main():
+    options.parse_command_line()
+    io_loop = IOLoop.current()
+    log.info("Docker host: %s", Storage.DOCKER)
+    log.info("ElasticSearch host: %s", Storage.ELASTICSEARCH)
+    io_loop.add_callback(Docker)
+    io_loop.add_callback(ElasticStreamer)
+
+
+if __name__ == "__main__":
+    IOLoop.current().add_callback(main)
+    IOLoop.current().start()
