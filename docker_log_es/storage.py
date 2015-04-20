@@ -17,30 +17,22 @@ class UnixResolver(Resolver):
 
     @gen.coroutine
     def resolve(self, host, port, *args, **kwargs):
+
         scheme, path = Storage.DOCKER.split('://')
-        if host == 'docker' and scheme == 'unix':
-            raise gen.Return([(socket.AF_UNIX, path)])
-        elif scheme == 'tcp':
-            t = path.split(":")
-            if len(t) > 1:
-                host, port = t
-                port = int(port)
-            else:
-                host, port = t[0], 80
+        if host == 'docker':
 
-        scheme, path = Storage.ELASTICSEARCH.split('://')
-        if host == 'elastic' and scheme == 'unix':
-            raise gen.Return([(socket.AF_UNIX, path)])
-        elif scheme == 'tcp':
-            t = path.split(":")
-            if len(t) > 1:
-                host, port = t
-                port = int(port)
-            else:
-                host, port = t[0], 80
+            if scheme == 'unix':
+                return [(socket.AF_UNIX, path)]
 
-        result = yield self.resolver.resolve(host, port, *args, **kwargs)
-        raise gen.Return(result)
+            elif scheme == 'tcp':
+                t = path.split(":")
+                if len(t) > 1:
+                    host, port = t
+                    port = int(port)
+                else:
+                    host, port = t[0], 80
+
+        yield from self.resolver.resolve(host, port, *args, **kwargs)
 
 
 AsyncHTTPClient.configure(
