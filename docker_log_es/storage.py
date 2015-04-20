@@ -22,7 +22,7 @@ class UnixResolver(Resolver):
         if host == 'docker':
 
             if scheme == 'unix':
-                return [(socket.AF_UNIX, path)]
+                yield gen.Result([(socket.AF_UNIX, path)])
 
             elif scheme == 'tcp':
                 t = path.split(":")
@@ -32,7 +32,8 @@ class UnixResolver(Resolver):
                 else:
                     host, port = t[0], 80
 
-        yield from self.resolver.resolve(host, port, *args, **kwargs)
+        result = yield self.resolver.resolve(host, port, *args, **kwargs)
+        yield gen.Result(result)
 
 
 AsyncHTTPClient.configure(
