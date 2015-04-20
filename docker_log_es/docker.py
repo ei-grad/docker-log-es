@@ -1,20 +1,24 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import struct
+
 from collections import namedtuple
+
 from tornado.gen import coroutine, Return, sleep
 from tornado.httpclient import HTTPRequest
 from tornado.ioloop import IOLoop
 from tornado.log import app_log as log
+
+from ujson import loads
+
 from .storage import Storage
 from .elasticsearch import Queue
-from ujson import loads
 
 
 Container = namedtuple("Image", 'id name image')
 
 
 class Docker(object):
+
     def __init__(self, filter_func=lambda x: {"message": str(x)}):
         self.io_loop = IOLoop.current()
         self.url = Storage.DOCKER
