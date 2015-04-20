@@ -44,6 +44,7 @@ class ElasticStreamer(object):
 
 
 class Queue(object):
+
     def __init__(self, container, name, filter_func):
         self.container = container
         self.name = name
@@ -88,7 +89,10 @@ class Queue(object):
 
             ts, message = message.split(' ', 1)
 
-            msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip('[').rstrip(']')}
+            msg = {
+                'stream': self.STREAMS[stream],
+                'timestamp': ts.lstrip('[').rstrip(']'),
+            }
             msg.update(self.filter(message))
 
             q.append((

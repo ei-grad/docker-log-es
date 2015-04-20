@@ -8,6 +8,7 @@ from tornado.httpclient import AsyncHTTPClient
 
 
 class UnixResolver(Resolver):
+
     def initialize(self, resolver):
         self.resolver = resolver
 
@@ -38,12 +39,15 @@ class UnixResolver(Resolver):
             else:
                 host, port = t[0], 80
 
-
         result = yield self.resolver.resolve(host, port, *args, **kwargs)
         raise gen.Return(result)
 
 
-AsyncHTTPClient.configure(None, resolver=UnixResolver(resolver=Resolver()), max_clients=20000)
+AsyncHTTPClient.configure(
+    None,
+    resolver=UnixResolver(resolver=Resolver()),
+    max_clients=20000
+)
 
 
 class Storage(object):

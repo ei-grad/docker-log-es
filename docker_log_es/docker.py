@@ -64,7 +64,10 @@ class Docker(object):
 
     @coroutine
     def do_logs(self, container, log_filter):
-        url = "%s/containers/%s/logs?follow=1&tail=0&stderr=1&stdout=1&timestamps=1" % (self.url, container.id)
+
+        args = 'follow=1&tail=0&stderr=1&stdout=1&timestamps=1'
+
+        url = "%s/containers/%s/logs?%s" % (self.url, container.id, args)
 
         q = Queue(container, container.name, log_filter)
 

@@ -3,6 +3,7 @@
 
 
 class LineCollector(object):
+
     def __init__(self, emit):
         self.emit = emit
         self.buf = ""
