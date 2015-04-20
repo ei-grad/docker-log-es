@@ -21,7 +21,7 @@ class Docker(object):
 
     def __init__(self, filter_func=lambda x: {"message": str(x)}):
         self.io_loop = IOLoop.current()
-        self.url = Storage.DOCKER
+        self.url = 'http://docker'
         self._containers = {}
         self.running = True
         self.io_loop.add_callback(self.container_updater)
