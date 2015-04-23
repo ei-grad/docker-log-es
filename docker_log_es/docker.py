@@ -53,12 +53,15 @@ class Docker(object):
     def containers(self):
         url = "%s/containers/json?all=1&status=running" % self.url
         req = HTTPRequest(url=url, method='GET')
-        resp = yield Storage.http.fetch(request=req)
-        containers = map(
-            lambda x: (filter(lambda c: c.count('/') == 1, x['Names'])[0][1:], x['Image'], x['Id']),
-            filter(lambda x: 'Up' in x['Status'], loads(resp.body))
-        )
-        raise Return(containers)
+        try:
+            resp = yield Storage.http.fetch(request=req)
+            containers = map(
+                lambda x: (filter(lambda c: c.count('/') == 1, x['Names'])[0][1:], x['Image'], x['Id']),
+                filter(lambda x: 'Up' in x['Status'], loads(resp.body))
+            )
+            raise Return(containers)
+        except Exception as e:
+            log.exception(e)
 
     @coroutine
     def do_logs(self, container, log_filter):
