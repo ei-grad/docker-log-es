@@ -3,7 +3,7 @@
 from collections import namedtuple
 
 from tornado.gen import coroutine, Return, sleep
-from tornado.httpclient import HTTPRequest
+from tornado.httpclient import HTTPRequest, HTTPError
 from tornado.ioloop import IOLoop
 from tornado.log import app_log as log
 
@@ -60,9 +60,7 @@ class Docker(object):
                 filter(lambda x: 'Up' in x['Status'], loads(resp.body))
             )
             raise Return(containers)
-        except Return:
-            raise
-        except Exception as e:
+        except HTTPError as e:
             log.exception(e)
             raise Return([])
 
