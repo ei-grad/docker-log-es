@@ -24,7 +24,7 @@ class UnixResolver(Resolver):
             if scheme == 'unix':
                 raise gen.Return([(socket.AF_UNIX, path)])
 
-            elif scheme == 'tcp':
+            elif scheme == 'tcp' or scheme == 'http':
                 t = path.split(":")
                 if len(t) > 1:
                     host, port = t
