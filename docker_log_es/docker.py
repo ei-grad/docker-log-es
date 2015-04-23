@@ -15,7 +15,7 @@ Container = namedtuple("Image", 'id name image')
 
 
 class Docker(object):
-    def __init__(self, filter_func=lambda x: {"message": str(x)}):
+    def __init__(self, filter_func=lambda x, c: {"message": str(x)}):
         self.io_loop = IOLoop.current()
         self.url = Storage.DOCKER
         self._containers = {}
@@ -53,7 +53,7 @@ class Docker(object):
         req = HTTPRequest(url=url, method='GET')
         resp = yield Storage.http.fetch(request=req)
         containers = map(
-            lambda x: (x['Names'][0][1:], x['Image'], x['Id']),
+            lambda x: (filter(lambda c: c.count('/') == 1, x['Names'])[0][1:], x['Image'], x['Id']),
             filter(lambda x: 'Up' in x['Status'], loads(resp.body))
         )
         raise Return(containers)
@@ -62,7 +62,7 @@ class Docker(object):
     def do_logs(self, container, log_filter):
         url = "%s/containers/%s/logs?follow=1&tail=0&stderr=1&stdout=1&timestamps=1" % (self.url, container.id)
 
-        q = Queue(container, container.name, log_filter)
+        q = Queue(container, log_filter)
 
         Storage.http.fetch(
             url,
