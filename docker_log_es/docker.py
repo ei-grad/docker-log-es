@@ -60,8 +60,11 @@ class Docker(object):
                 filter(lambda x: 'Up' in x['Status'], loads(resp.body))
             )
             raise Return(containers)
+        except Return:
+            raise
         except Exception as e:
             log.exception(e)
+            raise Return([])
 
     @coroutine
     def do_logs(self, container, log_filter):
