@@ -55,10 +55,10 @@ class Docker(object):
         req = HTTPRequest(url=url, method='GET')
         try:
             resp = yield Storage.http.fetch(request=req)
-            containers = map(
-                lambda x: (filter(lambda c: c.count('/') == 1, x['Names'])[0][1:], x['Image'], x['Id']),
-                filter(lambda x: 'Up' in x['Status'], loads(resp.body))
-            )
+            containers = [(
+                [i for i in x['Names'] if i.count('/') == 1][0][1:],
+                x['Image'], x['Id'],
+            ) for x in loads(resp.body) if 'Up' in x['Status']]
             raise Return(containers)
         except HTTPError as e:
             log.exception(e)

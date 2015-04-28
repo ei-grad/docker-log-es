@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import struct
+
 from datetime import datetime
+import struct
+
 from ujson import dumps
+
 from tornado.gen import coroutine, sleep
 from tornado.ioloop import IOLoop
 from tornado.httpclient import HTTPRequest
 from tornado.log import app_log as log
-from .storage import Storage
+
+from docker_log_es.storage import Storage
+from docker_log_es.utils import b
 
 
 class ElasticStreamer(object):
@@ -21,15 +26,14 @@ class ElasticStreamer(object):
     def flush(self):
         while True:
             try:
-                body = ''
+                body = []
                 for q in list(self.QUEUES):
                     data = yield q.fetch()
                     for line in data:
                         opts, data = line
-                        body += opts
-                        body += '\n'
-                        body += data
-                        body += '\n'
+                        body.extend([opts, '\n', data, '\n'])
+
+                body = b(''.join(body))
 
                 if not body:
                     continue
@@ -47,7 +51,7 @@ class Queue(object):
     def __init__(self, container, filter_func):
         self.container = container
         self.filter = filter_func
-        self.__buff = ''
+        self.__buff = b('')
         self.__queue = []
         self.io_loop = IOLoop.current()
         self.io_loop.add_callback(ElasticStreamer.QUEUES.add, self)
@@ -88,12 +92,9 @@ class Queue(object):
             if not length:
                 continue
 
-            try:
-                ts, message = message.split(' ', 1)
-            except Exception as e:
-                log.exception(e)
+            ts, message = message.split(b(' '), 1)
 
-            msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip('[').rstrip(']')}
+            msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip(b('[')).rstrip(b(']'))}
             msg.update({
                 'container': self.container.name,
                 'image': self.container.image

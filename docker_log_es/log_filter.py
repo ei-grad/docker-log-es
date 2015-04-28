@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 # encoding: utf-8
+
 from collections import defaultdict
-from tornado.log import app_log as log
-import yaml
 import re
+
+from tornado.log import app_log as log
+
+import yaml
+
+from docker_log_es.utils import b
+
 
 no_filter = lambda x, c: {"message": str(x)}
 iteritems = lambda x: getattr(x, 'iteritems', x.items)()
@@ -18,7 +24,7 @@ def build_filters(names, images):
             return {'message': msg}
 
     def update_from_subparsers(subparsers, msg):
-        for field in msg.keys():
+        for field in list(msg.keys()):
             try:
                 parsers = subparsers.get(field)
                 if parsers:
@@ -56,12 +62,12 @@ def yml_filter(fd=None):
         names = {}
         images = {}
         for _filter, _cfg in config.items():
-            exp = re.compile(_cfg['exp'])
+            exp = re.compile(b(_cfg['exp']))
             subparsers = defaultdict(set)
 
             for field, parsers in iteritems(_cfg.get('subparsers', {})):
                 for matcher, parser in iteritems(parsers):
-                    subparsers[field].add((re.compile(matcher), re.compile(parser)))
+                    subparsers[field].add((re.compile(b(matcher)), re.compile(b(parser))))
 
             name = _cfg.get('name')
             image = _cfg.get('image')
