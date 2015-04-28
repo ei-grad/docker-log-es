@@ -2,10 +2,13 @@
 from tornado.log import app_log as log
 from tornado import gen
 from tornado.ioloop import IOLoop
-from tornado.options import options
+from tornado.options import options, define
 from docker_log_es.storage import Storage
 from docker_log_es.docker import Docker
 from docker_log_es.elasticsearch import ElasticStreamer
+from docker_log_es.log_filter import yml_filter
+
+define("config", default=None, help="config.yml file")
 
 @gen.coroutine
 def send_data(data):
@@ -18,7 +21,10 @@ def main():
     io_loop = IOLoop.current()
     log.info("Docker host: %s", Storage.DOCKER)
     log.info("ElasticSearch host: %s", Storage.ELASTICSEARCH)
-    io_loop.add_callback(Docker)
+    io_loop.add_callback(
+        Docker,
+        yml_filter(open(options.config, 'r') if options.config else None)
+    )
     io_loop.add_callback(ElasticStreamer)
 
 

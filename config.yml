@@ -1,0 +1,17 @@
+## My program name is test
+test:
+  ## Set like bellow if you want to process logs by part of the docker image name
+  #image: 'calm'
+  ## Set like bellow if you want to process logs by part of the docker container name
+  name: 'python_daemon'
+  exp: '^\[(?P<datetime>\d{4}-\d\d-\d\d \d+:\d+:\d+,\d+)\]\s+(?P<filename>[^:]+):(?P<lineno>\d+)\s+(?P<level>\w+)\s+(?P<message>.*)$'
+  subparsers:
+    ## the message field will process by this rules
+    message:
+      ## 'rexp for match a line': 'rexp for process a line
+      '^IP': '^IP:(?P<remote_ip>\d+) (?P<message>.*)'
+      'lat': 'lat:\s+(?P<lat>[\d\.]+)'
+      'lon': 'lon:\s+(?P<lon>[\d\.]+)'
+       # the result will be added to message (update)
+
+# When parser raise an exception message will be written as plain text

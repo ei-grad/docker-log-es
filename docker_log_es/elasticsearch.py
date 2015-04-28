@@ -85,7 +85,13 @@ class Queue(object):
 
             message, self.__buff = self.__buff[:length], self.__buff[length:]
 
-            ts, message = message.split(' ', 1)
+            if not length:
+                continue
+
+            try:
+                ts, message = message.split(' ', 1)
+            except Exception as e:
+                log.exception(e)
 
             msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip('[').rstrip(']')}
             msg.update({
