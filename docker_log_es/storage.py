@@ -46,5 +46,5 @@ AsyncHTTPClient.configure(
 class Storage(object):
     CONTAINERS = set([])
     DOCKER = env.get('DOCKER_HOST', 'unix:///var/run/docker.sock')
-    ELASTICSEARCH = env.get('ELASTICSEARCH', 'http://127.0.0.1:9200')
+    ELASTICSEARCH = env.get('ELASTICSEARCH', 'http://elasticsearch:9200')
     http = AsyncHTTPClient()
