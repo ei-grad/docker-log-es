@@ -16,9 +16,9 @@ setup(
     scripts=scripts,
     version='0.0.1',
     description='Put Docker logs to ElasticSearch',
-    author='Andrew Grigoriev, Dmitry Orlov',
+    author='Andrew Grigorev, Dmitry Orlov',
     author_email='andrew@ei-grad.ru, me@mosquito.su',
     url='https://github.com/ei-grad/docker-log-es',
     packages=find_packages(),
-    install_requires=['tornado', 'elasticsearch', 'ujson'],
+    install_requires=['tornado', 'ujson', 'PyYAML'],
 )
