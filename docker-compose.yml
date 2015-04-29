@@ -1,0 +1,20 @@
+dockerloges:
+    build: .
+    command: --config=/etc/dockerloges.yml
+    volumes:
+        - config.yml.example:/etc/dockerloges.yml
+    environment:
+        DOCKER_HOST: tcp://172.17.0.1:4142
+        ELASTICSEARCH: http://elasticsearch:9200
+    links:
+        - elasticsearch
+elasticsearch:
+    image: elasticsearch
+    expose:
+        - 9200
+kibana:
+    image: marcbachmann/kibana4
+    links:
+        - elasticsearch
+    ports:
+        - "80:5601"
