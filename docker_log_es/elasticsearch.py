@@ -11,6 +11,7 @@ from tornado.ioloop import IOLoop
 from tornado.httpclient import HTTPRequest
 from tornado.log import app_log as log
 
+from docker_log_es.log_filter import multiline_flag
 from docker_log_es.storage import Storage
 from docker_log_es.utils import b
 
@@ -57,8 +58,8 @@ class Queue(object):
         self.io_loop.add_callback(ElasticStreamer.QUEUES.add, self)
         self._closed = False
 
-    @classmethod
-    def get_index_name(cls):
+    @staticmethod
+    def get_index_name():
         return datetime.now().strftime('docker-%Y.%m.%d')
 
     def __call__(self, data):
@@ -77,9 +78,16 @@ class Queue(object):
 
     STREAMS = ('stdin', 'stdout', 'stderr')
 
+    def split(self, position):
+        message, self.__buff = self.__buff[:position], self.__buff[position:]
+        return message
+
     @coroutine
     def fetch(self):
         q = list()
+
+        on_message = self.filter(self.container)
+
         while len(self.__buff) > 8:
             header, self.__buff = self.__buff[:8], self.__buff[8:]
             stream, length = self.parse_header(header)
@@ -87,29 +95,35 @@ class Queue(object):
             if len(self.__buff) < length:
                 continue
 
-            message, self.__buff = self.__buff[:length], self.__buff[length:]
-
             if not length:
                 continue
 
+            message = self.split(length)
+
             ts, message = message.split(b(' '), 1)
 
-            msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip(b('[')).rstrip(b(']'))}
-            msg.update({
-                'container': self.container.name,
-                'image': self.container.image
-            })
+            result = on_message.send(message)
 
-            msg.update(self.filter(message, self.container))
+            if result is False:
+                continue
 
-            q.append((
-                dumps({
-                    'index': {
-                        '_index': self.get_index_name(),
-                        '_type': 'logs',
-                    }
-                }),
-                dumps(msg)
-            ))
+            else:
+                msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip(b('[')).rstrip(b(']'))}
+                msg.update({
+                    'container': self.container.name,
+                    'image': self.container.image
+                })
+
+                msg.update(result)
+                log.debug(msg)
+                q.append((
+                    dumps({
+                        'index': {
+                            '_index': self.get_index_name(),
+                            '_type': 'logs',
+                        }
+                    }),
+                    dumps(msg)
+                ))
 
         return q

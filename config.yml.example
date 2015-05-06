@@ -1,9 +1,11 @@
-## My program name is test
+## My program name is test (Doesn't matter)
 test:
   ## Set like bellow if you want to process logs by part of the docker image name
   #image: 'calm'
   ## Set like bellow if you want to process logs by part of the docker container name
   name: 'python_daemon'
+  # unmatched lines will be understood as multiline
+  multiline: '^\[\d{4}-\d\d-\d\d \d+:\d+:\d+,\d+\]'
   exp: '^\[(?P<datetime>\d{4}-\d\d-\d\d \d+:\d+:\d+,\d+)\]\s+(?P<filename>[^:]+):(?P<lineno>\d+)\s+(?P<level>\w+)\s+(?P<message>.*)$'
   subparsers:
     ## the message field will process by this rules
@@ -13,5 +15,11 @@ test:
       'lat': 'lat:\s+(?P<lat>[\d\.]+)'
       'lon': 'lon:\s+(?P<lon>[\d\.]+)'
        # the result will be added to message (update)
+
+test1:
+  # Ignoring logs for containers
+  # name: 'lolwat'
+  image: 'lolwat'
+  ignore: True
 
 # When parser raise an exception message will be written as plain text

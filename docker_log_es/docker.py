@@ -84,5 +84,6 @@ class Docker(object):
 
     def on_log_callback(self, result, queue, container):
         queue.close()
-        Storage.CONTAINERS.remove(container)
+        if container in Storage.CONTAINERS:
+            Storage.CONTAINERS.remove(container)
         self._containers.pop(container)
