@@ -113,15 +113,19 @@ class Queue(object):
 
             if result is False:
                 continue
-
             else:
                 msg = {'stream': self.STREAMS[stream], 'timestamp': ts.lstrip(b('[')).rstrip(b(']'))}
+
                 msg.update({
                     'container': self.container.name,
                     'image': self.container.image
                 })
 
-                msg.update(result)
+                if result is None:
+                    log.warning('Message "%s" not parsed by regular exception', message)
+                    msg.update({'message': message})
+                else:
+                    msg.update(result)
 
                 log.debug("Storing message %s", LasyJSON(msg))
 
