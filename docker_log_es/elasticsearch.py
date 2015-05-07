@@ -10,8 +10,6 @@ from tornado.gen import coroutine, sleep
 from tornado.ioloop import IOLoop
 from tornado.httpclient import HTTPRequest
 from tornado.log import app_log as log
-
-from docker_log_es.log_filter import multiline_flag
 from docker_log_es.storage import Storage
 from docker_log_es.utils import b
 

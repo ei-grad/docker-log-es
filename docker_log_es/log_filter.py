@@ -14,6 +14,7 @@ from docker_log_es.utils import b
 
 iteritems = lambda x: getattr(x, 'iteritems', x.items)()
 
+
 def coroutine(func):
     @wraps(func)
     def wrap(*args, **kwargs):
