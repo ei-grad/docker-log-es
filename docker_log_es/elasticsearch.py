@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from datetime import datetime
+import json
 import struct
 
 from ujson import dumps
@@ -12,6 +13,14 @@ from tornado.httpclient import HTTPRequest
 from tornado.log import app_log as log
 from docker_log_es.storage import Storage
 from docker_log_es.utils import b
+
+
+class LasyJSON(object):
+    def __init__(self, data):
+        self.dict = data
+
+    def __str__(self):
+        return json.dumps(self.dict, indent=1, ensure_ascii=False)
 
 
 class ElasticStreamer(object):
@@ -113,7 +122,9 @@ class Queue(object):
                 })
 
                 msg.update(result)
-                log.debug(msg)
+
+                log.debug("Storing message %s", LasyJSON(msg))
+
                 q.append((
                     dumps({
                         'index': {
